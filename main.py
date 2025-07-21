@@ -14,6 +14,7 @@ import psycopg2
 from psycopg2 import sql
 from contextlib import contextmanager
 import io
+import google.auth
 
 from google.cloud import firestore
 try:
@@ -21,7 +22,12 @@ try:
 except ImportError:
     print("ERROR: 無法導入 '情感top3提出_dandadan_fast_json' 模組中的函式。")
     sys.exit(1)
-
+credentials, project_id = google.auth.default()
+db = firestore.Client(
+    credentials=credentials,
+    project=animetext,
+    database="anime-label"  # <== 如果你確定有這個 database，就寫上它
+)
 app = FastAPI()
 
 # ====== CORS 配置 ======
