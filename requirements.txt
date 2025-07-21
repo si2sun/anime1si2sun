@@ -4,4 +4,4 @@ gunicorn
 pandas
 numpy
 google-cloud-firestore
-psycopg2-binar
+psycopg2-binary
