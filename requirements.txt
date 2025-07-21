@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+gunicorn
+pandas
+numpy
+google-cloud-firestore
+psycopg2-binar
