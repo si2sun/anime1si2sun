@@ -1,25 +1,28 @@
-# 1. 使用官方提供的、輕量級的 Python 3.11 映像檔作為基礎
-FROM python:3.11-slim
+# 使用輕量級的 Python 映像
+FROM python:3.10-slim
 
-# 2. 設定工作目錄
+# 設定工作目錄
 WORKDIR /app
 
-# 3. 將 requirements.txt 複製到映像檔中
-COPY requirements.txt requirements.txt
+# 複製 requirements 並安裝
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 4. 安裝所有需要的 Python 套件
-# --no-cache-dir 參數可以讓映像檔更小
-RUN pip install --no-cache-dir --upgrade pip -r requirements.txt
+# 複製程式碼
+COPY main.py .
+COPY 情感top3提出_dandadan_fast_json.py .
 
-# 5. 將您專案的所有程式碼複製到映像檔中
-COPY . .
+# Firestore 認證檔案 (你部署時要自己 mount 上去)
+# COPY animetext-anime1si2sun.json .
 
-# 6. 設定環境變數，告訴 Cloud Run 應用程式應該在哪個 Port 監聽
-ENV PORT 8080
+# 若有 template 檔案夾，記得加這行
+COPY templates/ templates/
 
-# 7. 最終的啟動指令
-# 使用 gunicorn 作為生產級伺服器來啟動您的 FastAPI 應用
-# -w 4: 啟動 4 個 worker process 來處理請求 (可依需求調整)
-# -k uvicorn.workers.UvicornWorker: 告訴 gunicorn 使用 uvicorn 來執行 ASGI 應用
-# main:app: 指向 main.py 檔案中的 app 物件
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app"]
+# 設定環境變數給 Firestore 使用（或用 volume 掛載）
+ENV GOOGLE_APPLICATION_CREDENTIALS="animetext-anime1si2sun.json"
+
+# 開放 port 8080
+EXPOSE 8080
+
+# 啟動 FastAPI 伺服器（非開發模式）
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
