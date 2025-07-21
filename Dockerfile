@@ -2,7 +2,7 @@
 FROM python:3.11-slim
 
 # 2. 設定工作目錄
-WORKDIR /app
+WORKDIR /anime1si2sun
 
 # 3. 將 requirements.txt 複製到映像檔中
 COPY requirements.txt requirements.txt
