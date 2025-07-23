@@ -2,7 +2,7 @@
 fastapi
 uvicorn[standard]
 gunicorn
-
+jinja2
 # 數據處理
 pandas
 numpy
