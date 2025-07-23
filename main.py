@@ -137,9 +137,11 @@ async def startup_event():
         db = firestore.Client(project="animetext", database="anime-label")
         # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-        print("INFO: Firestore 客戶端初始化成功。")
+        print("INFO: Firestore 初始化成功")
     except Exception as e:
-        print(f"ERROR: Firestore 客戶端初始化失敗: {e}"); sys.exit(1)
+        print("ERROR: Firestore 客戶端初始化失敗:")
+        traceback.print_exc()  # 印出完整錯誤堆疊
+        sys.exit(1)
 
     print("\n--- 開始從 Firestore 載入情感映射檔案 ---")
     start_time = time.time()
