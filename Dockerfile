@@ -38,4 +38,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s \
 # 使用 --bind 綁定到 0.0.0.0:$PORT
 # 建議先從 1 或 2 個 worker 開始 (-w 2)
 # 增加 --timeout 以應對可能較長的分析時間
-CMD ["gunicorn", "-w", "2", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:$PORT", "--timeout", "120", "main:app"]
+CMD gunicorn -w 2 -k uvicorn.workers.UvicornWorker --bind "0.0.0.0:$PORT" main:app
