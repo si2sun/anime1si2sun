@@ -14,35 +14,44 @@ import psycopg2
 from psycopg2 import sql
 from contextlib import contextmanager
 import io
-import google.auth
-
+from dotenv import load_dotenv
 from google.cloud import firestore
 try:
     from 情感top3提出_dandadan_fast_json import get_top3_emotions_fast, get_top5_density_moments
 except ImportError:
     print("ERROR: 無法導入 '情感top3提出_dandadan_fast_json' 模組中的函式。")
     sys.exit(1)
-credentials, project_id = google.auth.default()
-db = firestore.Client(
-    credentials=credentials,
-    project=animetext,
-    database="anime-label"  # <== 如果你確定有這個 database，就寫上它
-)
+import google.auth
+from google.cloud import firestore
+load_dotenv()
+# credentials, project_id = google.auth.default()
+# db = firestore.Client(
+#     credentials=credentials,
+#     project='animetext',
+#     database="anime-label"  # <== 如果你確定有這個 database，就寫上它
+# )
 app = FastAPI()
-
 # ====== CORS 配置 ======
-origins = ["http://localhost", "http://127.0.0.1", "http://127.0.0.1:5000"]
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+# 生產環境允許所有來源，但限制特定方法和標頭
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 生產環境可改為具體域名
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+    max_age=600
+)
 
 # templates = Jinja2Templates(directory=".")
 templates = Jinja2Templates(directory="templates")
 
 # ====== PostgreSQL 資料庫配置 ======
-DB_HOST = "35.223.124.201"
-DB_PORT = "5432"
-DB_NAME = "anime1si2sun"
-DB_USER = "postgres"
-DB_PASSWORD = "lty890509"
+import os
+DB_HOST = os.getenv("DB_HOST", "35.223.124.201")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME", "anime1si2sun")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "lty890509")
 DATABASE_URL = f"dbname={DB_NAME} user={DB_USER} password={DB_PASSWORD} host={DB_HOST} port={DB_PORT}"
 
 @contextmanager
@@ -62,7 +71,7 @@ AVAILABLE_ANIME_NAMES, YOUTUBE_ANIME_EPISODE_URLS, BAHAMUT_ANIME_EPISODE_URLS, A
 TAG_COMBINATION_MAPPING, EMOTION_CATEGORY_MAPPING = {}, {}
 db = None
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "animetext-anime1si2sun.json"
+
 
 def load_anime_data_from_db():
     print("\n--- 開始從 PostgreSQL 載入動漫數據 ---")
@@ -111,13 +120,24 @@ def load_anime_data_from_db():
 
 @app.on_event("startup")
 async def startup_event():
-    # ... (此函式保持不變) ...
     print(f"伺服器啟動中...")
     load_anime_data_from_db()
     
     global db, TAG_COMBINATION_MAPPING, EMOTION_CATEGORY_MAPPING
     try:
-        db = firestore.Client(database="anime-label")
+        # <<<<<<< 關鍵修改：在這裡一次性完成驗證和初始化 >>>>>>>
+        credentials, project_id = google.auth.default()
+        if project_id:
+            print(f"INFO: Google Cloud Project ID '{project_id}' 已自動偵測。")
+        else:
+            # 如果還是找不到，提供一個後備方案或明確的錯誤
+            project_id = "animetext" # 或者您的真實 Project ID
+            print(f"WARN: 無法自動偵測 Project ID，使用預設值 '{project_id}'。")
+
+        # 將偵測到的 project_id 傳入
+        db = firestore.Client(project="animetext", database="anime-label")
+        # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
         print("INFO: Firestore 客戶端初始化成功。")
     except Exception as e:
         print(f"ERROR: Firestore 客戶端初始化失敗: {e}"); sys.exit(1)
@@ -265,6 +285,3 @@ async def get_emotions_api(anime_name: str, custom_emotions: list[str] = Query(N
     t_end = time.time()
     print(f"--- 搜尋請求 '{anime_name}' 處理完成，總耗時 {t_end - t_start:.4f} 秒 ---\n")
     return final_output
-
-if __name__ == '__main__':
-    uvicorn.run("main:app", host="0.0.0.0", port=8080)
