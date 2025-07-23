@@ -24,11 +24,11 @@ COPY templates/ templates/
 EXPOSE 8080
 
 # 8. 設定部署時需要提供的環境變數 (僅為標示，實際值在部署時設定)
-ENV DB_HOST="35.223.124.201"
-ENV DB_PORT="5432"
-ENV DB_NAME="anime1si2sun"
-ENV DB_USER="postgres"
-ENV DB_PASSWORD="lty890509"
+# ENV DB_HOST="35.223.124.201"
+# ENV DB_PORT="5432"
+# ENV DB_NAME="anime1si2sun"
+# ENV DB_USER="postgres"
+# ENV DB_PASSWORD="lty890509"
 
 # 9. 健康檢查 (可選，但建議修正)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s \
