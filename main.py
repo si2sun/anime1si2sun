@@ -14,7 +14,6 @@ import psycopg2
 from psycopg2 import sql
 from contextlib import contextmanager
 import io
-from dotenv import load_dotenv
 from google.cloud import firestore
 try:
     from 情感top3提出_dandadan_fast_json import get_top3_emotions_fast, get_top5_density_moments
@@ -23,7 +22,7 @@ except ImportError:
     sys.exit(1)
 import google.auth
 from google.cloud import firestore
-load_dotenv()
+
 # credentials, project_id = google.auth.default()
 # db = firestore.Client(
 #     credentials=credentials,
