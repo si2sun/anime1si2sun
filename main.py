@@ -93,7 +93,18 @@ def load_anime_data_from_db():
         
         anime_normalized = unicodedata.normalize('NFC', str(anime_original).strip())
         AVAILABLE_ANIME_NAMES.append(anime_normalized)
-        ep_key = str(episode).strip()
+        
+        # ====== 修改這裡 ======
+        ep_key_raw = episode
+        ep_key = ""
+        if ep_key_raw is not None:
+            try:
+                # 嘗試將其轉換為整數，然後再轉為字串
+                ep_key = str(int(float(ep_key_raw))).strip()
+            except (ValueError, TypeError):
+                # 如果轉換失敗，保留原始字串形式
+                ep_key = str(ep_key_raw).strip()
+        # ====================
 
         YOUTUBE_ANIME_EPISODE_URLS.setdefault(anime_normalized, {})
         BAHAMUT_ANIME_EPISODE_URLS.setdefault(anime_normalized, {})
