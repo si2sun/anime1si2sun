@@ -6,8 +6,9 @@ jinja2
 # 數據處理
 pandas
 numpy
-
+redis
 # 資料庫與 Google Cloud
 google-cloud-firestore
 psycopg2-binary
 google-auth
+
